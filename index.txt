@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Notes</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#fafafa;
+}
+
+/* Sidebar */
+.sidebar{
+  width:220px;
+  background:#fff;
+  border-right:1px solid #ddd;
+  height:100vh;
+  position:fixed;
+  padding:15px;
+  overflow:auto;
+}
+
+.sidebar h2{
+  font-size:18px;
+}
+
+.note-item{
+  padding:8px;
+  cursor:pointer;
+  border-radius:6px;
+}
+
+.note-item:hover{
+  background:#eee;
+}
+
+/* Main */
+.main{
+  margin-left:240px;
+  padding:20px;
+}
+
+textarea{
+  width:100%;
+  min-height:90vh;
+  border:none;
+  outline:none;
+  font-size:16px;
+  line-height:1.6;
+  resize:none;
+  background:transparent;
+}
+
+button{
+  padding:8px 12px;
+  margin-top:10px;
+  border:none;
+  background:black;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>📒 Catatan</h2>
+  <div id="list"></div>
+  <button onclick="newNote()">+ Baru</button>
+</div>
+
+<div class="main">
+  <textarea id="editor" placeholder="Tulis cerita panjangmu di sini..."></textarea>
+</div>
+
+<script>
+let notes = JSON.parse(localStorage.getItem("longNotes")) || [];
+let active = null;
+
+const editor = document.getElementById("editor");
+const list = document.getElementById("list");
+
+function save(){
+  localStorage.setItem("longNotes",JSON.stringify(notes));
+}
+
+function render(){
+  list.innerHTML="";
+  notes.forEach(n=>{
+    const d=document.createElement("div");
+    d.className="note-item";
+    d.innerText=n.title || "Tanpa Judul";
+    d.onclick=()=>openNote(n.id);
+    list.appendChild(d);
+  });
+}
+
+function newNote(){
+  const id=Date.now();
+  notes.unshift({
+    id,
+    title:"Catatan Baru",
+    content:""
+  });
+  openNote(id);
+  save();
+  render();
+}
+
+function openNote(id){
+  active=id;
+  const n=notes.find(n=>n.id==id);
+  editor.value=n.content;
+}
+
+editor.addEventListener("input",()=>{
+  const n=notes.find(n=>n.id==active);
+  if(!n) return;
+  n.content=editor.value;
+  n.title=editor.value.split("\n")[0];
+  save();
+  render();
+});
+
+render();
+</script>
+
+</body>
+</html>
